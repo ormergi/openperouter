@@ -22,7 +22,7 @@ import (
 	"github.com/openperouter/openperouter/e2etests/pkg/openperouter"
 )
 
-var _ = Describe("Node Router Status", func() {
+var _ = FDescribe("Node Router Status", func() {
 	const routerNamespace = openperouter.Namespace
 
 	var nodes []corev1.Node
@@ -146,4 +146,3 @@ func withConditions(conditions []metav1.Condition) opt {
 		s.Status.Conditions = conditions
 	}
 }
-

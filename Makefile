@@ -89,7 +89,7 @@ test: fmt vet envtest $(LOCALBIN) ## Run tests.
 		go test -tags=runasroot -c -race -o $(LOCALBIN)/$$name.test $$pkg; \
 		RUNASROOT_TESTS="$$RUNASROOT_TESTS /src/bin/$$name.test"; \
 	done; \
-	$(CONTAINER_ENGINE) run --rm --privileged -v $$(pwd):/src -w /src --entrypoint /src/hack/integration_tests.sh $(KIND_NODE_IMG) $$RUNASROOT_TESTS
+	$(CONTAINER_ENGINE) run --rm --privileged -v $$(pwd):/src:Z -w /src --entrypoint /src/hack/integration_tests.sh $(KIND_NODE_IMG) $$RUNASROOT_TESTS
 
 ##@ Build
 
@@ -112,18 +112,14 @@ BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
-	@if [ "$(CONTAINER_ENGINE)" = "podman" ]; then \
-		sudo $(CONTAINER_ENGINE) build  -t ${IMG} .; \
-	else \
 		$(CONTAINER_ENGINE) build -t ${IMG} .; \
-	fi
 
 
 TLS_VERIFY ?= "true"
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
 	@if [ "$(CONTAINER_ENGINE)" = "podman" ]; then \
-		sudo $(CONTAINER_ENGINE) push --tls-verify=${TLS_VERIFY} ${IMG}; \
+		$(CONTAINER_ENGINE) push --tls-verify=${TLS_VERIFY} ${IMG}; \
 	else \
 		$(CONTAINER_ENGINE) push ${IMG}; \
 	fi
@@ -452,7 +448,7 @@ generate-all-in-one: manifests kustomize ## Create manifests
 
 .PHONY: helm-docs
 helm-docs:
-	docker run --rm -v $$(pwd):/app -w /app jnorwood/helm-docs:$(HELM_DOCS_VERSION) helm-docs
+	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/app:Z -w /app docker.io/jnorwood/helm-docs:$(HELM_DOCS_VERSION) helm-docs
 
 .PHONY: api-docs
 api-docs: crd-ref-docs

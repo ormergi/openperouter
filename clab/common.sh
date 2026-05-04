@@ -16,8 +16,9 @@ KIND_COMMAND=$KIND
 
 if [[ $CONTAINER_ENGINE == "podman" ]]; then
     RUNTIME_OPTION="--runtime podman"
-    CONTAINER_ENGINE_CLI="sudo podman"
-    KIND_COMMAND="sudo KIND_EXPERIMENTAL_PROVIDER=podman $KIND"
+    CONTAINER_ENGINE_CLI="podman"
+    export KIND_EXPERIMENTAL_PROVIDER=podman
+    KIND_COMMAND="$KIND"
     if ! systemctl is-enabled --quiet podman.socket || ! systemctl is-active --quiet podman.socket; then
         echo "Enabling and starting podman.socket service..."
         sudo systemctl enable podman.socket

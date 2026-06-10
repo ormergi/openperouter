@@ -664,3 +664,13 @@ deploy-olm: operator-sdk ## deploys OLM on the cluster
 
 build-and-push-bundle-images: bundle-build bundle-push catalog-build catalog-push
 
+GATHER_NAME ?= must-gather
+GATHER_IMG ?= $(IMG_REPO)/$(GATHER_NAME):$(IMG_TAG)
+
+.PHONY: build-must-gather-image
+gather-build:
+	$(CONTAINER_ENGINE) build -f must-gather/Containerfile -t $(GATHER_IMG)
+
+.PHONY: push-must-gather-image
+gather-push:
+	$(MAKE) docker-push IMG=$(GATHER_IMG)

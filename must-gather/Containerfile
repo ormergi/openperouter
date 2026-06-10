@@ -1,0 +1,7 @@
+FROM quay.io/openshift/origin-cli:4.22
+
+USER 65532:65532
+
+COPY ./collection-scripts/gather ./usr/bin/gather
+
+ENTRYPOINT ["/usr/bin/gather"]

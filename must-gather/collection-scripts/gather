@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+COLLECTION_DIR=${COLLECTION_DIR:-"/must-gather"}
+NS=${NS:-"openperouter-system"}
+CTL_BIN=${CTL_BIN:-"oc"}
+
+function gather_perouter_logs() {
+	local -r netns_exec="ip netns exec perouter ip"
+	declare -A cmds=(
+		[netns-ip-link]="${netns_exec} link"
+		[netns-ip-address]="${netns_exec} address"
+		[netns-ip-route]="${netns_exec} route"
+		[netns-ip-neigh]="${netns_exec} neigh"
+		[netns-ip-vrf]="${netns_exec} vrf"
+		[frr-config]="vtysh -c 'show running-config'"
+		[frr-bgp-ipv4]="vtysh -c 'show bgp ipv4'"
+		[frr-bgp-ipv6]="vtysh -c 'show bgp ipv6'"
+		[frr-bgp-neighbors]="vtysh -c 'show bgp neighbor'"
+		[frr-bfd-peer]="vtysh -c 'show bfd peer'"
+		[frr-bgp-l2vpn-evpn]="vtysh -c 'show bgp l2vpn evpn'"
+	)
+
+	frr_logs_dir="$COLLECTION_DIR/perouter_frr"
+	mkdir -p "$frr_logs_dir"
+
+	router_pods=$(${CTL_BIN} get pods -l app=router -n ${NS} -o jsonpath='{.items[*].metadata.name}')
+	for pod in ${router_pods}; do
+		for cmd_name in "${!cmds[@]}"; do
+			cmd="${cmds[${cmd_name}]}"
+			echo "[${NS}/${pods}] ${cmd}" >> ${frr_logs_dir}/dump.log
+			echo "$( timeout -v 20s ${CTL_BIN} -n ${NS} exec ${pod} -c frr -- ${cmd})" >> \
+				"${frr_logs_dir}/${NS}_${pod}_${cmd_name}.log"
+		done
+	done
+}
+
+# collect pod logs and manifests
+${CTL_BIN} adm inspect --dest-dir="${COLLECTION_DIR}" namespace/"${NS}"
+
+# collect CRDs
+readonly CRDS=("underlays" "l2vnis" "l3vnis" "l3passthroughs" "rawfrrconfigs" "routernodeconfigurationstatuses")
+for crd in "${CRDS[@]}"; do
+	${CTL_BIN} adm inspect --dest-dir="${COLLECTION_DIR}/perouter_crds" -n ${NS} "${crd}"
+done
+
+# collect perouter logs
+gather_perouter_logs
+
+exit 0 

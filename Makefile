@@ -667,7 +667,7 @@ build-and-push-bundle-images: bundle-build bundle-push catalog-build catalog-pus
 INSPECT_DIR ?= /tmp/openperouter-inspect
 .PHONY: inspect
 inspect:
-	tools/inspect/inspect --k8s-client=$(KUBECTL) --dest-dir=$(INSPECT_DIR)
+	tools/inspect/inspect --k8s-client=$(KUBECTL) --dest-dir=$(INSPECT_DIR) --since=$(SINCE)
 
 HOST_INSPECT_DIR = /openperouter-inspect-host
 .PHONY: inspect-host

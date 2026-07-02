@@ -16,18 +16,24 @@ $ ./inspect --dest-dir=/tmp/perouter-logs
 # use a different Kubernetes client
 $ ./inspect --dest-dir=mydir --k8s-client=oc
 
+# collect logs since relative time duration
+$ ./inspect --since=3m
+
 # via global Make target
 $ make inspect
+
+$ make inspect KUBECTL=oc INSPECT_DIR=mydir SINCE=2m
 ```
 **Note:** Options must be specified with `=`.
 
 ### Options
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--namespace` | `openperouter-system` | OpenPERouter namespace |
-| `--dest-dir` | `openperouter-inspect` | Output directory path |
-| `--k8s-client` | `kubectl` | Kubernetes client |
-| `-h`, `--help` | | Print usage instructions |
+| Option         | Description                                                       | Default                |
+|----------------|-------------------------------------------------------------------|------------------------|
+| `--namespace`  | OpenPERouter namespace                                            | `openperouter-system`  |
+| `--dest-dir`   | Output directory path                                             | `openperouter-inspect` |
+| `--k8s-client` | Kubernetes client                                                 | `kubectl`              |
+| `--since`      | Collect pod logs newer then relative duration (e.g.: 5s, 10m, 2h) |                        |
+| `-h`, `--help` | Print usage instructions                                          |                        |
 
 ## Output
 The artifact directory contains following files: 
